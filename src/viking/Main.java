@@ -525,6 +525,7 @@ public class Main {
 	}
 
 	public static void main(String[] args) throws Exception {
+		//"I am the Test"
 		//renameFiles();
 		
 		//DailyDataService.loadData();
