@@ -12,9 +12,12 @@ public class DailyDataService {
 	
 	public static void main(String[] args) throws Exception {
 		//transformData();
-		 loadData();
-		 out.println(getClose("002726","2014-08-18"));
-		 out.println(getVolume("000002","2014-08-18"));
+		loadDailyData(); 
+	//	 loadData();
+		 out.println(getClose("002726","2016-01-13"));
+		 out.println(getOpen("000002","2016-10-14"));
+		 out.println(getHigh("000417","2016-08-30"));
+		 out.println(getLow("002293","2016-09-08"));
 	}
 	
 	static double getHigh(String symbol,String date){
@@ -31,6 +34,14 @@ public class DailyDataService {
 			low = dailyData.get(date).get(symbol).get("low");
 		}catch(Exception e){}
 		return low;
+	}
+	
+	static double getChange(String symbol,String date){
+		double open = -100;
+		try{
+			open = dailyData.get(date).get(symbol).get("change");
+		}catch(Exception e){}
+		return open;
 	}
 	
 	static double getOpen(String symbol,String date){
@@ -66,7 +77,7 @@ public class DailyDataService {
 	}
 	
 	static private HashMap<String, HashMap<String, HashMap<String, Double>>> dailyData = new HashMap<String, HashMap<String, HashMap<String, Double>>>();
-	static String base = "E:\\360_Quant\\Quant_Strategy\\Be_A_Quant\\Daily_Data\\stock_data\\";
+	static String base = "E:\\Be_A_Quant\\Daily_Data\\stock_data\\";
 	
 	static HashMap<String,HashMap<String,String>> transformMap = new HashMap<String,HashMap<String,String>>();
 	static void transformData() throws Exception{
@@ -96,7 +107,7 @@ public class DailyDataService {
 		
 			for(String date:transformMap.keySet()){
 				out.println(date);
-				String output = "E:\\360_Quant\\Quant_Strategy\\Be_A_Quant\\Daily_Data\\stock_data_daily\\"+date+".csv";
+				String output = "E:\\Be_A_Quant\\Daily_Data\\stock_data_daily\\"+date+".csv";
 				BufferedWriter bw = FileOperation.writeFile(output);
 				bw.append("code,date,open,high,low,close,change,volume,money,traded_market_value,market_value,turnover,adjust_price,report_type,report_date,PE_TTM,PS_TTM,PC_TTM,PB,adjust_price_f");
 				bw.newLine();
@@ -114,9 +125,40 @@ public class DailyDataService {
 		return dailyData.get(date).keySet();
 	}
 	
+	static void loadDailyData() throws Exception{
+		String folder = "E:\\Be_A_Quant\\Daily_Data\\stock_data_daily\\";
+		LinkedList<String> list = FileOperation.getFileNames(folder);
+		for(String fileName:list)
+		{
+			String date = fileName.substring(0,fileName.indexOf("."));
+			if(!date.startsWith("2015")&&!date.startsWith("2016"))
+				continue;
+			out.println(date);
+			HashMap<String, HashMap<String, Double>> todayMap = new HashMap<String, HashMap<String, Double>>();			
+			BufferedReader br = FileOperation.openFile(folder + fileName);
+			String s=br.readLine().trim();
+			String[] keyArr = s.split(",");				
+			while ((s = br.readLine()) != null) {
+				String[] valueArr = s.trim().split(",");
+				String symbol = valueArr[0].substring(2);
+				HashMap<String, Double> stockMap = new HashMap<String, Double>();
+				stockMap.put(keyArr[2], Double.parseDouble(valueArr[2]));
+				stockMap.put(keyArr[3], Double.parseDouble(valueArr[3]));
+				stockMap.put(keyArr[4], Double.parseDouble(valueArr[4]));
+				stockMap.put(keyArr[5], Double.parseDouble(valueArr[5]));
+				stockMap.put(keyArr[6], Double.parseDouble(valueArr[6]));
+				stockMap.put(keyArr[7], Double.parseDouble(valueArr[7]));
+				todayMap.put(symbol,stockMap);
+			}			
+			dailyData.put(date, todayMap);
+			br.close();
+		}
+		out.println(dailyData.size());
+	}
+	
 	static void loadData() throws Exception{
 
-		//String output = "E:\\360_Quant\\Quant_Strategy\\Be_A_Quant\\out.txt";
+		//String output = "E:\\Be_A_Quant\\out.txt";
 		//BufferedWriter bw = FileOperation.writeFile(output);
 		LinkedList<String> list = FileOperation.getFileNames(base);
 		for (String fileName : list) {
@@ -143,8 +185,8 @@ public class DailyDataService {
 				stockMap.put(keyArr[3], Double.parseDouble(valueArr[3]));
 				stockMap.put(keyArr[4], Double.parseDouble(valueArr[4]));
 				stockMap.put(keyArr[5], Double.parseDouble(valueArr[5]));
-				stockMap.put(keyArr[7], Double.parseDouble(valueArr[7]));
-				stockMap.put(keyArr[19], Double.parseDouble(valueArr[19]));
+				//stockMap.put(keyArr[7], Double.parseDouble(valueArr[7]));
+				//stockMap.put(keyArr[19], Double.parseDouble(valueArr[19]));
 				// stockMap.put(keyArr[4], Double.parseDouble(valueArr[4]));
 				
 				//double adjuct_f = Double.parseDouble(valueArr[19]);
